@@ -1,0 +1,640 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Arushi Mathur | The Ackerman File</title>
+    <meta name="description" content="Manga Style Portfolio of Arushi Mathur">
+    
+    <!-- Fonts: 'Cinzel', 'Shippori Mincho', 'Oswald', 'Permanent Marker' -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Oswald:wght@300;500&family=Permanent+Marker&family=Shippori+Mincho:wght@400;500;700&display=swap" rel="stylesheet">
+    
+    <!-- Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        /* --- ACKERMAN ART BOOK PALETTE --- */
+        :root {
+            --bg-paper: #f4f4f0;       /* Warm White Paper */
+            --ink-black: #1a1a1a;      /* Sumi Ink */
+            --scarf-red: #8a0b18;      /* Mikasa's Scarf Red */
+            --corps-green: #2e5c48;    /* Levi's Cloak Green */
+            --parchment: #eaddcf;      /* Old Paper */
+            --steel-grey: #546e7a;     /* Blade Steel */
+            
+            --font-title: 'Cinzel', serif;
+            --font-jp: 'Shippori Mincho', serif;
+            --font-header: 'Oswald', sans-serif;
+            --font-stamp: 'Permanent Marker', cursive;
+            
+            --border-ink: 3px solid var(--ink-black);
+        }
+
+        /* --- RESET & BASE --- */
+        * { margin: 0; padding: 0; box-sizing: border-box; cursor: none; }
+        html { scroll-behavior: smooth; }
+
+        body {
+            font-family: var(--font-jp);
+            background-color: var(--bg-paper);
+            color: var(--ink-black);
+            overflow-x: hidden;
+            line-height: 1.7;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.05'/%3E%3C/svg%3E");
+        }
+
+        /* --- CUSTOM CURSOR --- */
+        .mouse-cursor {
+            position: fixed; width: 20px; height: 20px;
+            border: 2px solid var(--ink-black); border-radius: 50%;
+            pointer-events: none; z-index: 9999;
+            transform: translate(-50%, -50%);
+            transition: width 0.3s, height 0.3s, background-color 0.3s;
+            mix-blend-mode: difference;
+        }
+        .mouse-dot {
+            position: fixed; width: 6px; height: 6px;
+            background-color: var(--scarf-red); border-radius: 50%;
+            pointer-events: none; z-index: 10000;
+            transform: translate(-50%, -50%);
+        }
+        .mouse-cursor.hovered { width: 50px; height: 50px; background-color: rgba(46, 92, 72, 0.3); border-color: var(--corps-green); }
+
+        /* --- BACKGROUNDS --- */
+        #anime-canvas { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: -1; }
+        .scarf-path { position: fixed; top: 0; left: 0; width: 100%; height: 100vh; z-index: -2; pointer-events: none; opacity: 0.1; }
+        .bg-clouds { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: -2; opacity: 0.03; background-image: url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M30,50 Q40,30 60,50 T90,50 Q100,70 80,70 T50,70 Q30,70 30,50 Z' fill='%23000' /%3E%3C/svg%3E"); background-size: 300px 300px; animation: drift 60s linear infinite; }
+        @keyframes drift { from { background-position: 0 0; } to { background-position: 100% 100%; } }
+
+        /* --- UTILS --- */
+        .container { max-width: 1100px; margin: 0 auto; padding: 0 40px; position: relative; }
+        section { padding: 120px 0; position: relative; }
+        
+        .reveal { opacity: 0; transform: translateY(30px); transition: all 1s cubic-bezier(0.16, 1, 0.3, 1); }
+        .reveal.active { opacity: 1; transform: translateY(0); }
+
+        .jp-vertical-title {
+            writing-mode: vertical-rl;
+            font-family: var(--font-jp);
+            font-weight: 900;
+            font-size: 4rem;
+            color: rgba(26, 26, 26, 0.05);
+            position: absolute;
+            top: 0; left: -20px;
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        /* --- HERO --- */
+        .hero { min-height: 100vh; display: flex; align-items: center; justify-content: center; }
+        .char-sheet { display: grid; grid-template-columns: 1fr 1.2fr; gap: 60px; align-items: center; }
+        
+        .profile-container { position: relative; width: 350px; height: 450px; animation: float 6s ease-in-out infinite; }
+        .profile-img { width: 100%; height: 100%; object-fit: cover; clip-path: polygon(10% 0, 100% 0, 90% 100%, 0% 100%); filter: grayscale(100%) contrast(1.1); transition: 0.5s; }
+        .profile-container:hover .profile-img { filter: grayscale(0%); clip-path: polygon(0 0, 100% 10%, 100% 100%, 10% 90%); }
+        .profile-border { position: absolute; top: -15px; left: -15px; width: 100%; height: 100%; border: 2px solid var(--scarf-red); z-index: -1; clip-path: polygon(10% 0, 100% 0, 90% 100%, 0% 100%); transition: 0.5s; }
+        .profile-container:hover .profile-border { transform: translate(10px, 10px); border-color: var(--corps-green); }
+        @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
+
+        .hero-name { font-size: 4.5rem; font-family: var(--font-title); line-height: 0.9; margin-bottom: 10px; border-left: 6px solid var(--scarf-red); padding-left: 30px; }
+        .hero-role { font-family: var(--font-header); font-size: 1.5rem; letter-spacing: 4px; color: var(--steel-grey); }
+        
+        .cravat-icon {
+            font-size: 2rem; color: var(--corps-green); margin-bottom: 10px; display: block;
+            transform: rotate(-15deg);
+        }
+
+        /* --- SKILLS: THE THREE WALLS (Parchment Style) --- */
+        .walls-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 40px;
+            margin-top: 60px;
+        }
+
+        .wall-card {
+            background-color: var(--parchment);
+            background-image: radial-gradient(circle, rgba(0,0,0,0.02) 1px, transparent 1px);
+            background-size: 10px 10px;
+            border: 2px solid #bcaaa4;
+            padding: 10px;
+            position: relative;
+            box-shadow: 10px 10px 0 rgba(62, 39, 35, 0.2);
+            transition: 0.3s;
+        }
+
+        .wall-card:hover { transform: translateY(-10px); }
+
+        .wall-inner {
+            border: 2px dashed #8d6e63;
+            padding: 20px;
+            height: 100%;
+            display: flex; flex-direction: column;
+        }
+
+        .wall-seal {
+            position: absolute; top: -20px; left: 50%; transform: translateX(-50%);
+            width: 50px; height: 50px;
+            background: var(--ink-black);
+            color: #fff;
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-family: var(--font-jp); font-weight: bold; font-size: 1.5rem;
+            border: 3px solid #fff;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        .wall-title {
+            text-align: center; font-family: var(--font-title); font-size: 1.4rem; 
+            margin-top: 20px; margin-bottom: 15px; border-bottom: 2px solid var(--ink-black); padding-bottom: 5px;
+        }
+
+        .stat-row { display: flex; justify-content: space-between; margin-bottom: 8px; font-family: var(--font-header); font-size: 0.9rem; }
+        .stat-bar { height: 6px; background: rgba(0,0,0,0.1); width: 100%; margin-top: 2px; border-radius: 3px; overflow: hidden; }
+        
+        /* Different colors for walls */
+        .stat-fill.red { height: 100%; background: var(--scarf-red); }
+        .stat-fill.green { height: 100%; background: var(--corps-green); }
+        .stat-fill.grey { height: 100%; background: var(--steel-grey); }
+
+        /* --- HISTORY: EXPEDITION LOG (Ink Style) --- */
+        .expedition-log {
+            position: relative;
+            margin-top: 60px;
+            padding-left: 50px;
+        }
+
+        /* The Path Line */
+        .expedition-log::before {
+            content: ''; position: absolute; left: 19px; top: 0; bottom: 0;
+            width: 2px; background-image: linear-gradient(to bottom, var(--ink-black) 50%, transparent 50%);
+            background-size: 2px 20px; /* Dashed line */
+        }
+
+        .log-entry { margin-bottom: 60px; position: relative; }
+
+        /* Scout Badge Marker */
+        .log-entry::after {
+            content: ''; position: absolute; left: -40px; top: 0;
+            width: 20px; height: 20px;
+            background: #fff; border: 4px solid var(--scarf-red);
+            transform: rotate(45deg);
+            z-index: 2;
+        }
+
+        .log-content {
+            background: #fff;
+            border-left: 4px solid var(--ink-black);
+            padding: 20px 30px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.05);
+            transition: 0.3s;
+        }
+        .log-entry:hover .log-content { border-left-color: var(--corps-green); transform: translateX(10px); }
+
+        .log-chapter {
+            position: absolute; top: -15px; right: 20px;
+            background: var(--ink-black); color: #fff;
+            font-family: var(--font-header); padding: 2px 10px;
+            font-size: 0.8rem; letter-spacing: 2px;
+        }
+
+        .log-role { font-family: var(--font-title); font-size: 1.5rem; color: var(--ink-black); }
+        .log-org { font-family: var(--font-header); color: var(--steel-grey); text-transform: uppercase; letter-spacing: 1px; }
+        .log-date { display: block; font-family: monospace; color: #888; font-size: 0.9rem; margin-top: 5px; }
+
+        /* --- PROJECTS: TARGET INTEL (Cards) --- */
+        .intel-grid {
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 40px; margin-top: 60px;
+        }
+
+        .intel-card {
+            border: 3px solid var(--ink-black);
+            background: #fff;
+            position: relative;
+            overflow: hidden;
+            transition: 0.3s;
+            cursor: pointer;
+        }
+
+        .intel-card:hover { transform: scale(1.02); }
+
+        /* Nape Cut Effect (Spinning) */
+        .intel-slash {
+            position: absolute; top: 50%; left: 50%; width: 150%; height: 10px;
+            background: var(--corps-green);
+            transform: translate(-50%, -50%) rotate(45deg) scaleX(0);
+            transition: 0.3s; z-index: 10;
+            mix-blend-mode: multiply;
+        }
+        .intel-card:hover .intel-slash { transform: translate(-50%, -50%) rotate(45deg) scaleX(1); opacity: 0.5; }
+
+        .intel-header {
+            background: var(--ink-black); color: #fff; padding: 10px 20px;
+            display: flex; justify-content: space-between; align-items: center;
+            font-family: var(--font-header);
+        }
+
+        .intel-body { padding: 30px; position: relative; }
+        
+        .intel-stamp {
+            position: absolute; bottom: 20px; right: 20px;
+            border: 3px solid var(--scarf-red); color: var(--scarf-red);
+            font-family: var(--font-stamp); font-size: 1.2rem;
+            padding: 5px 10px; transform: rotate(-15deg);
+            opacity: 0.3; transition: 0.3s;
+        }
+        .intel-card:hover .intel-stamp { opacity: 1; transform: rotate(-15deg) scale(1.2); }
+
+        .intel-title { font-family: var(--font-title); font-size: 1.4rem; font-weight: bold; margin-bottom: 5px; }
+        .intel-stack { font-family: monospace; font-size: 0.8rem; color: #666; margin-bottom: 15px; }
+        
+        .intel-desc-hidden {
+            max-height: 0; overflow: hidden; transition: 0.4s ease; font-size: 0.9rem; color: #444; border-top: 1px dashed #ccc; margin-top: 10px;
+        }
+        .intel-card.active .intel-desc-hidden { max-height: 200px; padding-top: 10px; }
+
+        /* --- FOOTER STYLES --- */
+        footer {
+            background-color: var(--ink-black);
+            color: #fff;
+            padding: 80px 0 40px;
+            margin-top: 50px;
+            text-align: left;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Manga texture overlay for footer */
+        footer::before {
+            content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background-image: radial-gradient(#222 15%, transparent 16%);
+            background-size: 4px 4px; opacity: 0.1; pointer-events: none;
+        }
+
+        .footer-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr;
+            gap: 50px;
+            margin-bottom: 60px;
+            position: relative;
+            z-index: 2;
+        }
+
+        .footer-col h3 {
+            font-family: var(--font-header);
+            font-size: 1.1rem;
+            color: var(--scarf-red);
+            margin-bottom: 25px;
+            letter-spacing: 2px;
+            border-left: 3px solid #fff;
+            padding-left: 15px;
+            text-transform: uppercase;
+        }
+
+        .footer-bio { font-size: 0.95rem; color: #ccc; line-height: 1.8; max-width: 350px; }
+
+        .footer-links { list-style: none; padding: 0; }
+        .footer-links li { margin-bottom: 12px; }
+        .footer-links a { color: #999; text-decoration: none; font-family: var(--font-header); letter-spacing: 1px; transition: 0.3s; position: relative; }
+        .footer-links a:hover { color: #fff; padding-left: 15px; }
+        .footer-links a::before { content: '>'; position: absolute; left: 0; opacity: 0; transition: 0.3s; color: var(--scarf-red); }
+        .footer-links a:hover::before { opacity: 1; }
+
+        .footer-socials { display: flex; gap: 20px; font-size: 1.4rem; margin-bottom: 25px; }
+        .footer-socials a { color: #fff; transition: 0.3s; display: flex; align-items: center; justify-content: center; width: 40px; height: 40px; border: 1px solid #333; border-radius: 50%; }
+        .footer-socials a:hover { color: var(--scarf-red); border-color: var(--scarf-red); transform: translateY(-3px); }
+
+        .system-status { font-family: monospace; font-size: 0.75rem; color: #666; border: 1px solid #333; padding: 8px 12px; display: inline-block; background: rgba(0,0,0,0.5); }
+
+        .footer-bottom { text-align: center; border-top: 1px solid #333; padding-top: 40px; position: relative; z-index: 2; }
+        .anime-quote { font-family: var(--font-title); font-size: 1.2rem; color: #fff; margin-bottom: 10px; }
+        .copyright { font-size: 0.8rem; color: #555; font-family: monospace; }
+
+        /* --- RESPONSIVE MEDIA QUERIES --- */
+        @media (max-width: 900px) {
+            .char-sheet { grid-template-columns: 1fr; gap: 40px; }
+            .hero-name { font-size: 3rem; }
+            .profile-container { margin: 0 auto; width: 280px; height: 360px; }
+            .walls-container { grid-template-columns: 1fr; }
+            .footer-grid { grid-template-columns: 1fr; text-align: center; }
+            .footer-col h3 { border-left: none; border-bottom: 2px solid #fff; display: inline-block; padding-bottom: 5px; padding-left: 0; }
+            .footer-bio { margin: 0 auto; }
+            .footer-socials { justify-content: center; }
+            /* Hide custom cursor on touch devices */
+            .mouse-cursor, .mouse-dot { display: none; }
+            * { cursor: auto; }
+        }
+
+        @media (max-width: 480px) {
+            .container { padding: 0 20px; }
+            .hero-name { font-size: 2.5rem; }
+            .profile-container { width: 240px; height: 320px; }
+            .wall-seal { width: 40px; height: 40px; font-size: 1.2rem; }
+            .log-entry::after { width: 15px; height: 15px; left: -37px; }
+            .expedition-log { padding-left: 30px; }
+            .log-content { padding: 15px; }
+            .intel-header { flex-direction: column; align-items: flex-start; gap: 5px; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Mouse Follower -->
+    <div class="mouse-cursor"></div>
+    <div class="mouse-dot"></div>
+
+    <!-- Backgrounds -->
+    <div class="bg-clouds"></div>
+    <canvas id="anime-canvas"></canvas>
+    <svg class="scarf-path" viewBox="0 0 100 100" preserveAspectRatio="none"><path d="M-10,10 Q30,50 50,20 T110,80" fill="none" stroke="#8a0b18" stroke-width="0.3" opacity="0.1"/></svg>
+
+    <!-- HERO -->
+    <section class="hero reveal" id="home">
+        <div class="container char-sheet">
+            <div class="hero-text">
+                <i class="fas fa-feather-alt cravat-icon"></i> <!-- Levi Element -->
+                <div class="name-block">
+                    <h1 class="hero-name">ARUSHI<br>MATHUR</h1>
+                    <div class="hero-role">DATA SCIENTIST</div>
+                </div>
+                <p style="font-size: 1.1rem; color: #555; max-width: 400px;">"If you don't fight, you can't win. Analyzing data to predict the future."</p>
+                <div class="stat-block">
+                    <div class="stat-item"><span class="stat-label">CLASS</span><span class="stat-value">ACKERMAN</span></div>
+                    <div class="stat-item"><span class="stat-label">STATUS</span><span class="stat-value" style="color: var(--corps-green)">ACTIVE</span></div>
+                </div>
+            </div>
+            <div class="profile-container">
+                <div class="profile-border"></div>
+                <img src="arushi.jpg" alt="Arushi" class="profile-img">
+            </div>
+        </div>
+    </section>
+
+    <!-- SKILLS: THE THREE WALLS -->
+    <section class="reveal" id="skills">
+        <div class="container">
+            <div class="jp-vertical-title">能力</div>
+            <h2 style="text-align: right; border-bottom: 3px solid var(--ink-black); display: inline-block; float: right;">Combat Stats</h2>
+            <div style="clear: both;"></div>
+
+            <div class="walls-container">
+                <!-- Wall 1: Data Science -->
+                <div class="wall-card">
+                    <div class="wall-seal">数</div> <!-- Number/Data -->
+                    <div class="wall-inner">
+                        <h3 class="wall-title">DATA SCIENCE</h3>
+                        <div class="stat-row"><span>Statistics & Modeling</span><span>95%</span></div>
+                        <div class="stat-bar"><div class="stat-fill red" style="width: 95%;"></div></div>
+                        <div class="stat-row" style="margin-top:10px;"><span>Python & Pandas</span><span>90%</span></div>
+                        <div class="stat-bar"><div class="stat-fill red" style="width: 90%;"></div></div>
+                        <p style="font-size: 0.85rem; margin-top: 15px; color: #666;">Processing raw data streams using Pandas, Visualization, and Statistical Hypothesis Testing.</p>
+                    </div>
+                </div>
+
+                <!-- Wall 2: Machine Learning -->
+                <div class="wall-card">
+                    <div class="wall-seal">知</div> <!-- Intellect/Knowledge -->
+                    <div class="wall-inner">
+                        <h3 class="wall-title">MACHINE LEARNING</h3>
+                        <div class="stat-row"><span>Deep Learning (CNN)</span><span>90%</span></div>
+                        <div class="stat-bar"><div class="stat-fill green" style="width: 90%;"></div></div>
+                        <div class="stat-row" style="margin-top:10px;"><span>TensorFlow / Scikit</span><span>85%</span></div>
+                        <div class="stat-bar"><div class="stat-fill green" style="width: 85%;"></div></div>
+                        <p style="font-size: 0.85rem; margin-top: 15px; color: #666;">Designing predictive models using Regression, Classification, and Neural Networks.</p>
+                    </div>
+                </div>
+
+                <!-- Wall 3: Development -->
+                <div class="wall-card">
+                    <div class="wall-seal">技</div> <!-- Skill/Tech -->
+                    <div class="wall-inner">
+                        <h3 class="wall-title">DEVELOPMENT</h3>
+                        <div class="stat-row"><span>Java Development</span><span>85%</span></div>
+                        <div class="stat-bar"><div class="stat-fill grey" style="width: 85%;"></div></div>
+                        <div class="stat-row" style="margin-top:10px;"><span>Git / Algorithms</span><span>80%</span></div>
+                        <div class="stat-bar"><div class="stat-fill grey" style="width: 80%;"></div></div>
+                        <p style="font-size: 0.85rem; margin-top: 15px; color: #666;">Fortifying code infrastructure with robust algorithms, Data Structures, and Version Control.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- HISTORY: EXPEDITION LOG -->
+    <section class="reveal" id="history">
+        <div class="container">
+            <h2 style="border-left: 6px solid var(--corps-green); padding-left: 20px;">Expedition Log</h2>
+            
+            <div class="expedition-log">
+                <!-- Entry 1 -->
+                <div class="log-entry">
+                    <span class="log-chapter">57TH EXPEDITION</span>
+                    <div class="log-content">
+                        <h3 class="log-role">Data Science Intern</h3>
+                        <span class="log-org">Celebal Technologies</span>
+                        <span class="log-date">MAY 2025 - JULY 2025</span>
+                        <p style="margin-top: 10px;">Led the offensive on House Price Prediction. Deployed advanced regression algorithms.</p>
+                    </div>
+                </div>
+
+                <!-- Entry 2 -->
+                <div class="log-entry">
+                    <span class="log-chapter">TRAINING CORPS</span>
+                    <div class="log-content">
+                        <h3 class="log-role">Analytics Intern</h3>
+                        <span class="log-org">IBM SkillBuild</span>
+                        <span class="log-date">JUNE 2024 - AUG 2024</span>
+                        <p style="margin-top: 10px;">Engineered the AQI Prediction System. Analyzed environmental threats (2020-2023).</p>
+                    </div>
+                </div>
+
+                <!-- Entry 3 -->
+                <div class="log-entry">
+                    <span class="log-chapter">CADET SQUAD</span>
+                    <div class="log-content">
+                        <h3 class="log-role">ML Trainee</h3>
+                        <span class="log-org">UPFLAIRS</span>
+                        <span class="log-date">JUNE 2024 - AUG 2024</span>
+                        <p style="margin-top: 10px;">Cadet Training Complete. Executed models for Image Classification (CNN).</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- PROJECTS: TITAN TARGETS -->
+    <section class="reveal" id="projects">
+        <div class="container">
+            <h2 style="text-align: center; margin-bottom: 20px;">Target Intel</h2>
+            
+            <div class="intel-grid">
+                <!-- Target 1 -->
+                <div class="intel-card" onclick="toggleIntel(this)">
+                    <div class="intel-slash"></div>
+                    <div class="intel-header">
+                        <span>#001</span>
+                        <span>CONFIDENTIAL</span>
+                    </div>
+                    <div class="intel-body">
+                        <h3 class="intel-title">House Price Analysis</h3>
+                        <div class="intel-stack">PYTHON // SCIKIT-LEARN</div>
+                        <div class="intel-stamp">ELIMINATED</div>
+                        <div class="intel-desc-hidden">
+                            <p>Target acquired using Regression algorithms. Successfully secured accurate market valuations.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Target 2 -->
+                <div class="intel-card" onclick="toggleIntel(this)">
+                    <div class="intel-slash"></div>
+                    <div class="intel-header">
+                        <span>#002</span>
+                        <span>DEPLOYED</span>
+                    </div>
+                    <div class="intel-body">
+                        <h3 class="intel-title">Crop Recommender</h3>
+                        <div class="intel-stack">K-MEANS CLUSTERING</div>
+                        <div class="intel-stamp">CLEARED</div>
+                        <div class="intel-desc-hidden">
+                            <p>Unsupervised Clustering on soil attributes. Determined optimal harvest strategies.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Target 3 -->
+                <div class="intel-card" onclick="toggleIntel(this)">
+                    <div class="intel-slash"></div>
+                    <div class="intel-header">
+                        <span>#003</span>
+                        <span>ACTIVE</span>
+                    </div>
+                    <div class="intel-body">
+                        <h3 class="intel-title">Target Recognition</h3>
+                        <div class="intel-stack">TENSORFLOW CNN</div>
+                        <div class="intel-stamp">PURSUING</div>
+                        <div class="intel-desc-hidden">
+                            <p>Neural Network architecture built for high-accuracy binary classification (Dog vs Cat).</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer>
+        <div class="container">
+            <div class="footer-grid">
+                <!-- Column 1: Bio -->
+                <div class="footer-col">
+                    <h3>Operative Summary</h3>
+                    <p class="footer-bio">
+                        Data Scientist and Machine Learning Engineer dedicated to uncovering truths within complex data. 
+                        Specializing in predictive analytics, deep learning architectures, and robust software engineering. 
+                        Always ready for the next expedition beyond the walls.
+                    </p>
+                </div>
+
+                <!-- Column 2: Navigation -->
+                <div class="footer-col">
+                    <h3>Navigation</h3>
+                    <ul class="footer-links">
+                        <li><a href="#home">HOME BASE</a></li>
+                        <li><a href="#skills">COMBAT STATS</a></li>
+                        <li><a href="#history">EXPEDITION LOG</a></li>
+                        <li><a href="#projects">TARGET INTEL</a></li>
+                    </ul>
+                </div>
+
+                <!-- Column 3: Connect -->
+                <div class="footer-col">
+                    <h3>Comms Channel</h3>
+                    <div class="footer-socials">
+                        <a href="mailto:arushimathur053@gmail.com" title="Email"><i class="fas fa-envelope"></i></a>
+                        <a href="https://linkedin.com/in/arushi-mathur-2983a5289" title="LinkedIn"><i class="fab fa-linkedin"></i></a>
+                        <a href="https://github.com/Arushi5123" title="GitHub"><i class="fab fa-github"></i></a>
+                    </div>
+                    <div class="system-status">
+                        SYSTEM: <span style="color: var(--corps-green)">ONLINE</span><br>
+                        LOCATION: <span style="color: var(--scarf-red)">INDIA</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="footer-bottom">
+                <p class="anime-quote">"If you don't fight, you can't win."</p>
+                <p class="copyright">© 2025 Arushi Mathur. Engineered with Precision.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        function toggleIntel(el) { el.classList.toggle('active'); }
+
+        // --- MOUSE FOLLOWER ---
+        const cursor = document.querySelector('.mouse-cursor');
+        const dot = document.querySelector('.mouse-dot');
+        let mouseX = 0, mouseY = 0, cursorX = 0, cursorY = 0, dotX = 0, dotY = 0;
+
+        document.addEventListener('mousemove', (e) => {
+            mouseX = e.clientX; mouseY = e.clientY;
+            const target = e.target;
+            if (window.getComputedStyle(target).cursor === 'pointer') cursor.classList.add('hovered');
+            else cursor.classList.remove('hovered');
+        });
+
+        function animateCursor() {
+            cursorX += (mouseX - cursorX) * 0.2; cursorY += (mouseY - cursorY) * 0.2;
+            dotX += (mouseX - dotX) * 0.5; dotY += (mouseY - dotY) * 0.5;
+            cursor.style.left = cursorX + 'px'; cursor.style.top = cursorY + 'px';
+            dot.style.left = dotX + 'px'; dot.style.top = dotY + 'px';
+            requestAnimationFrame(animateCursor);
+        }
+        animateCursor();
+
+        // --- REVEAL ANIMATION ---
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => { if (entry.isIntersecting) entry.target.classList.add('active'); });
+        }, { threshold: 0.1 });
+        document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+
+        // --- CANVAS (Sakura & Scarf) ---
+        const canvas = document.getElementById('anime-canvas');
+        const ctx = canvas.getContext('2d');
+        let width, height, particles = [];
+
+        function resize() { width = canvas.width = window.innerWidth; height = canvas.height = window.innerHeight; }
+        class Particle {
+            constructor() {
+                this.x = Math.random() * width; this.y = Math.random() * height;
+                this.type = Math.random() > 0.7 ? 'scarf' : 'sakura';
+                this.size = Math.random() * 8 + 4;
+                this.speedY = Math.random() * 0.8 + 0.2; this.speedX = Math.random() * 1 - 0.5;
+                this.rotation = Math.random() * 360; this.rotSpeed = Math.random() * 2 - 1;
+                this.opacity = Math.random() * 0.4 + 0.2;
+            }
+            update() {
+                this.y += this.speedY; this.x += this.speedX + Math.sin(this.y * 0.01) * 0.3; this.rotation += this.rotSpeed;
+                if (this.y > height) { this.y = -20; this.x = Math.random() * width; }
+            }
+            draw() {
+                ctx.save(); ctx.translate(this.x, this.y); ctx.rotate(this.rotation * Math.PI / 180); ctx.globalAlpha = this.opacity;
+                if (this.type === 'scarf') {
+                    ctx.fillStyle = '#8a0b18'; ctx.beginPath();
+                    ctx.moveTo(-this.size/2, -this.size/2); ctx.lineTo(this.size/2, -this.size/2); ctx.lineTo(0, this.size/2); ctx.closePath(); ctx.fill();
+                } else {
+                    ctx.fillStyle = '#ffc0cb'; ctx.beginPath();
+                    ctx.moveTo(0, 0); ctx.bezierCurveTo(this.size/2, -this.size/2, this.size, 0, 0, this.size);
+                    ctx.bezierCurveTo(-this.size, 0, -this.size/2, -this.size/2, 0, 0); ctx.fill();
+                }
+                ctx.restore();
+            }
+        }
+        function initParticles() { particles = []; for (let i = 0; i < 50; i++) particles.push(new Particle()); }
+        function animate() { ctx.clearRect(0, 0, width, height); particles.forEach(p => { p.update(); p.draw(); }); requestAnimationFrame(animate); }
+        window.addEventListener('resize', resize); resize(); initParticles(); animate();
+    </script>
+</body>
+</html>
